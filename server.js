@@ -69,7 +69,7 @@ server.use((req, res, next) => {
   //intercepts OPTIONS method
   if ('OPTIONS' === req.method) {
     //respond with 200
-    res.send(200);
+    res.sendStatus(200);
   }
 
   /*             Autorization check
@@ -88,7 +88,7 @@ server.use((req, res, next) => {
 
   jwt.verify(token, appSecretKey, function (err, decoded) {
     if (err)
-      return res.status(500).send({ auth: false, message: 'Invalid token' });
+      return res.sendStatus(500).send({ auth: false, message: 'Invalid token' });
     // if everything good, save to request for use in other routes
     req.userId = decoded.id;
   });
@@ -123,7 +123,7 @@ server.post('/api-token-auth', (req, res) => {
 
   if (!data.email || !data.email) {
     console.log("Authentication failed");
-    return res.status(500).send('Email or password not provided');
+    return res.sendStatus(500).send('Email or password not provided');
   }
 
 
@@ -133,14 +133,14 @@ server.post('/api-token-auth', (req, res) => {
 
   if (user.length === 0) {
     console.log("Authentication failed");
-    return res.status(500).send('User does not exists');
+    return res.sendStatus(500).send('User does not exists');
   }
 
   user = user[0];
   
   if(user.password !== data.password) {
     console.log("Authentication failed");
-    return res.status(500).send('Invalid credentials');
+    return res.sendStatus(500).send('Invalid credentials');
   }
 
   console.log("Authentication succeeded");
@@ -153,7 +153,7 @@ server.post('/api-token-auth', (req, res) => {
     .find({ user_id: user.id })
     .value() || {};
 
-  res.status(200).send({ auth: true, token: token, user: user, user_settings: user_settings });
+  res.sendStatus(200).send({ auth: true, token: token, user: user, user_settings: user_settings });
 
 });
 
@@ -167,7 +167,7 @@ server.get('/api-token-refresh', (req, res) => {
 
   jwt.verify(token, appSecretKey, function (err, decoded) {
     if (err)
-      return res.status(500).send({ auth: false, message: 'Failed to authenticate token' });
+      return res.sendStatus(500).send({ auth: false, message: 'Failed to authenticate token' });
 
     // create new token
     var token = jwt.sign({ id: decoded.id }, appSecretKey, {
@@ -183,7 +183,7 @@ server.get('/api-token-refresh', (req, res) => {
       .find({ user_id: user.id })
       .value() || {};
 
-    res.status(200).send({ auth: true, token: token, user: user, user_settings: user_settings });
+    res.sendStatus(200).send({ auth: true, token: token, user: user, user_settings: user_settings });
   });
 
 })
@@ -216,7 +216,7 @@ server.post('/users/change-password', (req, res) => {
     .find({ id: req.userId }).value();
 
   if (user.password !== req.body.password)
-    return res.status(500).send("Invalid password");
+    return res.sendStatus(500).send("Invalid password");
 
   db.get('users')
     .find({ id: req.userId })
@@ -230,7 +230,7 @@ server.post('/users/change-password', (req, res) => {
         +'');
     });
 
-  res.status(200).send("Password changed");
+  res.sendStatus(200).send("Password changed");
 
 })
 
@@ -246,7 +246,7 @@ server.post('/api-password-reset', (req, res) => {
     .value();
 
   if (user.length == 0) {
-    return res.status(500).send('User does not exists');
+    return res.sendStatus(500).send('User does not exists');
   }
 
   user = user[0];
@@ -265,7 +265,7 @@ server.post('/api-password-reset', (req, res) => {
     '========================================\n' +
     +'');
 
-  res.status(200).send({ token: token });
+  res.sendStatus(200).send({ token: token });
 })
 
 /*            Reset password reset verify
@@ -279,9 +279,9 @@ server.post('/api-password-reset-verify', (req, res) => {
     .value();
 
   if (!token)
-    return res.status(500).send("Invalid token");
+    return res.sendStatus(500).send("Invalid token");
 
-  res.status(200).send('OK');
+  res.sendStatus(200).send('OK');
 })
 
 /*            Reset password reset confirm
@@ -295,7 +295,7 @@ server.post('/api-password-reset-confirm', (req, res) => {
     .value();
 
   if (!token)
-    return res.status(500).send("Invalid token");
+    return res.sendStatus(500).send("Invalid token");
 
   db.get('users')
     .find({ id: token.user_id })
@@ -312,7 +312,7 @@ server.post('/api-password-reset-confirm', (req, res) => {
         +'');
     });
 
-  res.status(200).send("Password reset success");
+  res.sendStatus(200).send("Password reset success");
 })
 
 // Start server
